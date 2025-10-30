@@ -1,4 +1,5 @@
-from typing import TypedDict, List, Dict, Any, Callable
+from typing import List, Dict, Any, Callable
+from typing_extensions import TypedDict
 
 class NodeSpec(TypedDict, total=False):
     id: str
