@@ -10,22 +10,30 @@ class NodeSpec(TypedDict, total=False):
     cost: Dict[str, float]       # e.g., {"llm_calls":1,"api_calls":0,"expected_latency_ms":900}
     fn: Callable[[Dict[str, Any]], Dict[str, Any]]
 
+# --- in your NodeRegistry class ---
 class NodeRegistry:
-    def __init__(self, specs: List[NodeSpec] | None = None):
-        self._by_id: Dict[str, NodeSpec] = {}
-        if specs:
-            for s in specs:
-                self.add(s)
+    def __init__(self):
+        self._nodes = {}  # id -> callable
 
-    def add(self, spec: NodeSpec):
-        assert "id" in spec and "fn" in spec
-        self._by_id[spec["id"]] = spec
+    def register(self, node_id: str, fn):
+        self._nodes[node_id] = fn
 
-    def get(self, nid: str) -> NodeSpec:
-        return self._by_id[nid]
+    # NEW: public helpers
+    def ids(self):
+        return list(self._nodes.keys())
 
-    def all(self) -> List[NodeSpec]:
-        return list(self._by_id.values())
+    def has(self, node_id: str) -> bool:
+        return node_id in self._nodes
+
+    def get(self, node_id: str):
+        return self._nodes[node_id]
+
+    # Optional Python protocol sugar
+    def __contains__(self, node_id: str):
+        return node_id in self._nodes
+
+    def __len__(self):
+        return len(self._nodes)
 
 # Optional decorator to register nodes from user code
 _GLOBAL_REGISTRY = NodeRegistry()
